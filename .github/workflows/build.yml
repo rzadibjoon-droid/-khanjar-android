@@ -13,9 +13,6 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    # ===============================
-    # System Dependencies
-    # ===============================
     - name: Install system dependencies
       run: |
         sudo apt update
@@ -26,9 +23,6 @@ jobs:
           python3-dev \
           build-essential
 
-    # ===============================
-    # Python (Stable for Kivy)
-    # ===============================
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -40,20 +34,20 @@ jobs:
         pip install cython==0.29.36
         pip install buildozer
 
-    # ===============================
-    # Build APK (Buildozer handles SDK & licenses)
-    # ===============================
+    # 👇 مهم: اجرای اولیه برای دانلود SDK
+    - name: Pre-download Android SDK
+      run: |
+        buildozer android help || true
+
     - name: Build APK with Buildozer
       run: |
-        buildozer android debug
+        buildozer -v android debug
 
-    # ===============================
-    # Upload APK
-    # ===============================
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: Khanjar-APK
         path: bin/*.apk
+        
         
         
