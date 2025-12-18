@@ -2,7 +2,8 @@ name: Build Khanjar APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
@@ -12,29 +13,56 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
+    # ===============================
+    # System Dependencies
+    # ===============================
+    - name: Install system dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          openjdk-17-jdk \
+          unzip zip \
+          libffi-dev libssl-dev \
+          python3-dev \
+          build-essential
+
+    # ===============================
+    # Python Setup (Stable for Kivy)
+    # ===============================
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
-    - name: Install system deps
+    - name: Upgrade pip & core tools
       run: |
-        sudo apt update
-        sudo apt install -y zip unzip openjdk-17-jdk \
-            python3-pip build-essential \
-            libffi-dev libssl-dev
+        python -m pip install --upgrade pip setuptools wheel
+        pip install cython==0.29.36
+        pip install buildozer
 
-    - name: Install buildozer
+    # ===============================
+    # Android SDK License FIX ✅
+    # ===============================
+    - name: Accept Android SDK licenses
+      env:
+        ANDROID_HOME: /home/runner/.buildozer/android/platform/android-sdk
       run: |
-        pip install --upgrade pip
-        pip install buildozer cython
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+        yes | sdkmanager --licenses
 
-    - name: Build APK
+    # ===============================
+    # Build APK
+    # ===============================
+    - name: Build APK with Buildozer
       run: |
         buildozer android debug
 
-    - name: Upload APK
+    # ===============================
+    # Upload APK
+    # ===============================
+    - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: khanjar-apk
+        name: Khanjar-APK
         path: bin/*.apk
+        
