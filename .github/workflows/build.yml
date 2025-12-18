@@ -27,31 +27,21 @@ jobs:
           build-essential
 
     # ===============================
-    # Python Setup (Stable for Kivy)
+    # Python (Stable for Kivy)
     # ===============================
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
-    - name: Upgrade pip & core tools
+    - name: Install Python tools
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install cython==0.29.36
         pip install buildozer
 
     # ===============================
-    # Android SDK License FIX ✅
-    # ===============================
-    - name: Accept Android SDK licenses
-      env:
-        ANDROID_HOME: /home/runner/.buildozer/android/platform/android-sdk
-      run: |
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-        yes | sdkmanager --licenses
-
-    # ===============================
-    # Build APK
+    # Build APK (Buildozer handles SDK & licenses)
     # ===============================
     - name: Build APK with Buildozer
       run: |
@@ -65,4 +55,5 @@ jobs:
       with:
         name: Khanjar-APK
         path: bin/*.apk
+        
         
